@@ -57,7 +57,7 @@ class ViewController: UIViewController, UISearchBarDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         pokemonSearchBar.delegate = self
-        
+        self.navigationItem.title = "Random Search"
     }
     
     @IBOutlet weak var pokemonSpriteImageView: UIImageView!
@@ -94,10 +94,10 @@ class ViewController: UIViewController, UISearchBarDelegate {
                     }
                 })
                 DispatchQueue.main.async {
-                    self.pokemonNameLabel.text = retrievedPokemon.name
+                    self.pokemonNameLabel.text = retrievedPokemon.name.capitalized
                     self.pokemonIdentifier.text = "\(retrievedPokemon.id)"
-                    self.pokemonHeightLabel.text = "\(retrievedPokemon.height)" + " Meters"
-                    self.pokemonWeightLabel.text = "\(retrievedPokemon.weight)" + " Kilograms"
+                    self.pokemonHeightLabel.text = "\(retrievedPokemon.height)" + " ft"
+                    self.pokemonWeightLabel.text = "\(retrievedPokemon.weight)" + " lbs"
                     self.isOriginalPokemonLabel.text = "\(retrievedPokemon.is_default)"
                     UIApplication.shared.isNetworkActivityIndicatorVisible = false
                 }
@@ -117,10 +117,10 @@ class ViewController: UIViewController, UISearchBarDelegate {
                 }
             })
             DispatchQueue.main.async {
-                self.pokemonNameLabel.text = ogPokemon.name
+                self.pokemonNameLabel.text = ogPokemon.name.capitalized
                 self.pokemonIdentifier.text = "#\(ogPokemon.id)"
-                self.pokemonHeightLabel.text = "\(ogPokemon.height) Meters"
-                self.pokemonWeightLabel.text = "\(ogPokemon.weight) Kilograms"
+                self.pokemonHeightLabel.text = "\(ogPokemon.height) ft"
+                self.pokemonWeightLabel.text = "\(ogPokemon.weight) lbs"
                 self.isOriginalPokemonLabel.text = "\(ogPokemon.is_default)"
                 UIApplication.shared.isNetworkActivityIndicatorVisible = false
             }

@@ -10,36 +10,11 @@ import UIKit
 
 class FullPokemonViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate {
     
-    // MARK: - SearchBar Delegate
-    
-     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        guard let searchBarText = searchBar.text else { return }
-        if searchBarText.isEmpty {
-            searchBar.resignFirstResponder()
-            return
-        } else {
-            UIApplication.shared.isNetworkActivityIndicatorVisible = true
-            PokemonController.searchForDetailedPokemon(givenPokemonName: searchBarText) { (fullPokemon) in
-                guard let detailedPokemon = fullPokemon else {
-                    DispatchQueue.main.async {
-                        let noPokemonFoundAlert = UIAlertController(title: "No Pokemon Found!", message: "Please make sure you typed the pokemon's name correctly or used an ID from 1 - 500", preferredStyle: .alert)
-                        noPokemonFoundAlert.addAction(UIAlertAction(title: "Ok", style: .cancel, handler: nil))
-                        self.present(noPokemonFoundAlert, animated: true, completion: nil)
-                        UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                    }
-                    return
-                }
-                DispatchQueue.main.async {
-                    self.detailedPokemon = detailedPokemon
-                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                    self.informationTableView.reloadData()
-                }
-                
-            }
-        }
-    }
-    
     // MARK: - TableView DataSource
+    
+     func numberOfSections(in tableView: UITableView) -> Int {
+           return 16
+       }
     
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         switch section {
@@ -72,10 +47,8 @@ class FullPokemonViewController: UIViewController, UITableViewDelegate, UITableV
         case 13:
             return "Held Items"
         case 14:
-            return "Sprites"
-        case 15:
             return "Stats"
-        case 16:
+        case 15:
             return "Types"
         default:
             return ""
@@ -97,10 +70,10 @@ class FullPokemonViewController: UIViewController, UITableViewDelegate, UITableV
         case 13:
             // "Held Items"
             return pokemon.held_items.count
-        case 15:
+        case 14:
             // "Stats"
             return pokemon.stats.count
-        case 16:
+        case 15:
             // "Types"
             return pokemon.types.count
         default:
@@ -131,17 +104,17 @@ class FullPokemonViewController: UIViewController, UITableViewDelegate, UITableV
         case 4:
             //return "Forms"
             let form = pokemon.forms[indexPath.row]
-            basicCell.textLabel?.text = form.name
+            basicCell.textLabel?.text = form.name.capitalized
             basicCell.detailTextLabel?.text = form.url
             return basicCell
         case 5:
             //return "Species"
-            basicCell.textLabel?.text = pokemon.species.name
+            basicCell.textLabel?.text = pokemon.species.name.capitalized
             basicCell.detailTextLabel?.text = pokemon.species.url
             return basicCell
         case 6:
             //return "Base Experience"
-            basicCell.textLabel?.text = "\(pokemon.base_experience)"
+            basicCell.textLabel?.text = "\(pokemon.base_experience) Exp"
             return basicCell
         case 7:
             //return "Original Pokemon?"
@@ -158,19 +131,17 @@ class FullPokemonViewController: UIViewController, UITableViewDelegate, UITableV
         case 9:
             //return "Moves"
             let action = pokemon.moves[indexPath.row]
-            basicCell.textLabel?.text = action.move.name
+            basicCell.textLabel?.text = action.move.name.capitalized
             return basicCell
         case 10:
             //return "Game Indicies"
             let gameIndex = pokemon.game_indices[indexPath.row]
-            basicCell.textLabel?.text = "\(gameIndex.game_index)"
-            basicCell.detailTextLabel?.text = "\(gameIndex.version.name)"
+            basicCell.textLabel?.text = "Index #: \(gameIndex.game_index) Version Name: \(gameIndex.version.name)"
             return basicCell
         case 11:
             //return "Abilities"
             let skill = pokemon.abilities[indexPath.row]
-            basicCell.textLabel?.text = skill.ability.name
-            basicCell.detailTextLabel?.text = "Slot #\(skill.slot)"
+            basicCell.textLabel?.text = skill.ability.name + ": Slot #\(skill.slot)"
             return basicCell
         case 12:
             //return "Order"
@@ -179,45 +150,73 @@ class FullPokemonViewController: UIViewController, UITableViewDelegate, UITableV
         case 13:
             //return "Held Items"
             let itemHeld = pokemon.held_items[indexPath.row]
-            basicCell.textLabel?.text = "item: \(itemHeld.item.name)"
+            basicCell.textLabel?.text = "item: \(itemHeld.item.name.capitalized)"
             return basicCell
         case 14:
-            //return "Sprites"
-            let sprites = [pokemon.sprites.back_default, pokemon.sprites.back_female, pokemon.sprites.back_shiny, pokemon.sprites.back_shiny_female, pokemon.sprites.front_default, pokemon.sprites.front_female, pokemon.sprites.front_shiny, pokemon.sprites.front_shiny_female]
-            basicCell.textLabel?.text = sprites[0] // just returning the url for now -- will use a custom image cell later
-            return basicCell
-        case 15:
             //return "Stats"
             let statistic = pokemon.stats[indexPath.row]
-            basicCell.textLabel?.text = statistic.stat.name
-            basicCell.detailTextLabel?.text = "Base level: \(statistic.base_stat)"
+            basicCell.textLabel?.text = "Base level \(statistic.stat.name): \(statistic.base_stat) Exp"
             return basicCell
-        case 16:
-            //return "Types"
-            let element = pokemon.types[indexPath.row]
-            basicCell.textLabel?.text = element.type.name
-            basicCell.detailTextLabel?.text = "Slot: \(element.slot)"
+        case 15:
+           //return "Types"
+           let element = pokemon.types[indexPath.row]
+           basicCell.textLabel?.text = element.type.name + " Slot: #\(element.slot)"
         default:
             return UITableViewCell()
         }
         return basicCell
     }
     
-    // MARK: - Outlets
+    // MARK: - TableView Delegate
     
-    @IBOutlet weak var searchBar: UISearchBar!
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        switch indexPath.section {
+            case 9:
+                // Do network call
+                
+                let selectedMove = detailedPokemon!.moves[indexPath.row]
+                move = selectedMove
+            default:
+                return
+        }
+    }
+    
+    // MARK: - Outlets
+
+    @IBOutlet weak var spriteImageView: UIImageView!
     @IBOutlet weak var informationTableView: UITableView!
     
     // MARK: - Internal Properties
     
-    var detailedPokemon: PokemonFull?
+    var detailedPokemon: PokemonFull? {
+        didSet {
+            getSprite()
+        }
+    }
+    var sprite: UIImage?
+    var move: Action? {
+        didSet {
+            self.performSegue(withIdentifier: "toShowMove", sender: self)
+        }
+    }
+    
+    func getSprite() {
+        PokemonController.getSpriteForPokemon(givenSpriteKey: detailedPokemon!.sprites.front_default) { (image) in
+            guard let sprite = image else { return }
+            self.sprite = sprite
+            DispatchQueue.main.async {
+                self.spriteImageView.image = sprite
+            }
+            }
+        }
     // MARK: - View Lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
         setupTableView()
-        setupSearchBar()
         self.informationTableView.reloadData()
+        self.informationTableView.rowHeight = UITableView.automaticDimension
+        self.informationTableView.estimatedRowHeight = CGFloat(100.0)
         // Do any additional setup after loading the view.
     }
     
@@ -226,9 +225,16 @@ class FullPokemonViewController: UIViewController, UITableViewDelegate, UITableV
     private func setupTableView() {
         self.informationTableView.delegate = self
         self.informationTableView.dataSource = self
+        self.informationTableView.register(UINib(nibName: "SpritesTableViewCell", bundle: nil), forCellReuseIdentifier: "spritesTableViewCell")
     }
     
-    private func setupSearchBar() {
-        self.searchBar.delegate = self
+    // MARK: - Navigation
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "toShowMove" {
+            guard let detailVC = segue.destination as? MoveDetailsTableViewController, let desiredAction = move else { return }
+            detailVC.navigationItem.title = desiredAction.move.name
+            detailVC.selectedMove = desiredAction
+        }
     }
+    
 }

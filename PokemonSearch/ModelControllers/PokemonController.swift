@@ -102,6 +102,25 @@ struct PokemonController {
         }
     }
     
+    static func getSpriteForPokemon(given pokemonId: Int, completion:@escaping (_ image: UIImage?) -> Void) {
+        let url = NetworkController.urlForDefaultSprite(pokemonId: pokemonId)
+        
+        NetworkController.performRequest(for: url, httpMethod: .get, urlParameters: nil, body: nil) { (data, error) in
+            guard let error = error else {
+                guard let recievedData = data else {
+                    print("No data returned")
+                    completion(nil)
+                    return
+                }
+                completion(UIImage(data: recievedData as Data))
+                return
+            }
+            print(error)
+            completion(nil)
+            return
+        }
+    }
+    
     static func getSpriteForPokemon(givenSpriteKey: String, completion:@escaping (_ image: UIImage?) -> Void) {
         guard let url = URL(string: givenSpriteKey) else { return }
         
